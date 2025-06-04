@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Your Booking - SkyLux Airlines</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .booking-container {
+            max-width: 900px;
+            margin: 120px auto 50px;
+            padding: 0 2rem;
+        }
+        
+        .booking-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .booking-summary {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .flight-details {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .flight-card {
+            background: #f7fafc;
+            border-radius: 10px;
+            padding: 1.5rem;
+        }
+        
+        .flight-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .flight-route {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .city {
+            font-weight: 600;
+        }
+        
+        .route-divider {
+            flex: 1;
+            height: 2px;
+            background: #e2e8f0;
+            margin: 0 1rem;
+            position: relative;
+        }
+        
+        .route-divider::after {
+            content: '✈️';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #f7fafc;
+            padding: 0 0.5rem;
+        }
+        
+        .flight-meta {
+            display: flex;
+            justify-content: space-between;
+            color: #4a5568;
+        }
+        
+        .passenger-form {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .form-title {
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #1a365d;
+        }
+        
+        .form-group input, .form-group select {
+            padding: 0.8rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        
+        .payment-summary {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .price-breakdown {
+            margin-bottom: 1.5rem;
+        }
+        
+        .price-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        
+        .price-total {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            font-size: 1.2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .confirm-btn {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #4299e1, #667eea);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+        }
+        
+        .confirm-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="nav-container">
+            <a href="/" class="logo">✈️ SkyLux</a>
+            <nav>
+                <ul class="nav-menu">
+                    <li><a href="/#home">Home</a></li>
+                    <li><a href="/#services">Services</a></li>
+                    <li><a href="/#about">About</a></li>
+                    <li><a href="/#manage">Manage</a></li>
+                    <li><a href="/#contact">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="booking-container">
+        <div class="booking-header">
+            <h1>Complete Your Booking</h1>
+            <p>You're just a few steps away from your premium travel experience</p>
+        </div>
+        
+        <div class="booking-summary">
+            <h2>Flight Summary</h2>
+            
+            <div class="flight-details">
+                <!-- Outbound Flight -->
+                <div class="flight-card">
+                    <div class="flight-header">
+                        <div>
+                            <strong>{{ flight.airline }}</strong> | {{ flight.flight_number }}
+                        </div>
+                        <div>
+                            {{ flight.departure_time.split('T')[0] }}
+                        </div>
+                    </div>
+                    
+                    <div class="flight-route">
+                        <div>
+                            <div>{{ flight.departure_time.split('T')[1][:5] }}</div>
+                            <div class="city">{{ flight.departure_city }}</div>
+                        </div>
+                        
+                        <div class="route-divider"></div>
+                        
+                        <div>
+                            <div>{{ flight.arrival_time.split('T')[1][:5] }}</div>
+                            <div class="city">{{ flight.arrival_city }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="flight-meta">
+                        <div>Duration: {{ flight.duration }}</div>
+                        <div>Aircraft: {{ flight.aircraft }}</div>
+                        <div>Class: {{ travel_class.capitalize() }}</div>
+                    </div>
+                </div>
+                
+                <!-- Return Flight (if any) -->
+                {% if return_flight %}
+                <div class="flight-card">
+                    <div class="flight-header">
+                        <div>
+                            <strong>{{ return_flight.airline }}</strong> | {{ return_flight.flight_number }}
+                        </div>
+                        <div>
+                            {{ return_flight.departure_time.split('T')[0] }}
+                        </div>
+                    </div>
+                    
+                    <div class="flight-route">
+                        <div>
+                            <div>{{ return_flight.departure_time.split('T')[1][:5] }}</div>
+                            <div class="city">{{ return_flight.departure_city }}</div>
+                        </div>
+                        
+                        <div class="route-divider"></div>
+                        
+                        <div>
+                            <div>{{ return_flight.arrival_time.split('T')[1][:5] }}</div>
+                            <div class="city">{{ return_flight.arrival_city }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="flight-meta">
+                        <div>Duration: {{ return_flight.duration }}</div>
+                        <div>Aircraft: {{ return_flight.aircraft }}</div>
+                        <div>Class: {{ travel_class.capitalize() }}</div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="passenger-form">
+            <h2 class="form-title">Passenger Information</h2>
+            
+            <form id="passengerForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="firstName">First Name</label>
+                        <input type="text" id="firstName" name="firstName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="lastName">Last Name</label>
+                        <input type="text" id="lastName" name="lastName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="dob">Date of Birth</label>
+                        <input type="date" id="dob" name="dob" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="nationality">Nationality</label>
+                        <input type="text" id="nationality" name="nationality" required>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+        <div class="payment-summary">
+            <h2 class="form-title">Payment Summary</h2>
+            
+            <div class="price-breakdown">
+                <div class="price-item">
+                    <div>{{ flight.flight_number }} ({{ travel_class.capitalize() }})</div>
+                    <div>${{ flight.price[travel_class] }}</div>
+                </div>
+                
+                {% if return_flight %}
+                <div class="price-item">
+                    <div>{{ return_flight.flight_number }} ({{ travel_class.capitalize() }})</div>
+                    <div>${{ return_flight.price[travel_class] }}</div>
+                </div>
+                {% endif %}
+                
+                <div class="price-item">
+                    <div>Taxes & Fees</div>
+                    <div>$35.00</div>
+                </div>
+                
+                <div class="price-total">
+                    <div>Total</div>
+                    <div>
+                        {% if return_flight %}
+                            ${{ flight.price[travel_class] + return_flight.price[travel_class] + 35 }}
+                        {% else %}
+                            ${{ flight.price[travel_class] + 35 }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <a href="/modify-booking/{{ booking_ref }}" class="confirm-btn">Confirm Booking</a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>SkyLux Airlines</h3>
+                    <p>Experience luxury beyond the clouds. Your premium travel partner for extraordinary journeys.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <a href="/#home">Home</a>
+                    <a href="/#services">Services</a>
+                    <a href="/#about">About Us</a>
+                    <a href="/#manage">Manage Booking</a>
+                </div>
+                <div class="footer-section">
+                    <h3>Customer Service</h3>
+                    <a href="tel:+1-800-SKYLUX">+1-800-SKYLUX</a>
+                    <a href="mailto:support@skylux.com">support@skylux.com</a>
+                    <a href="#">Live Chat Support</a>
+                    <a href="#">FAQ</a>
+                </div>
+                <div class="footer-section">
+                    <h3>Follow Us</h3>
+                    <a href="#">Facebook</a>
+                    <a href="#">Twitter</a>
+                    <a href="#">Instagram</a>
+                    <a href="#">LinkedIn</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 SkyLux Airlines. All rights reserved. | Privacy Policy | Terms of Service</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Header background change on scroll
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('.header');
+            if (window.scrollY > 100) {
+                header.style.background = 'rgba(255, 255, 255, 0.98)';
+                header.style.boxShadow = '0 5px 20px rgba(0, 0, 0, 0.1)';
+            } else {
+                header.style.background = 'rgba(255, 255, 255, 0.95)';
+                header.style.boxShadow = 'none';
+            }
+        });
+        
+        // Clear the selected outbound flight from session storage
+        // This is done so that if the user goes back to the flight results page,
+        // they can select a different flight
+        sessionStorage.removeItem('selectedOutboundFlight');
+    </script>
+</body>
+</html> 
