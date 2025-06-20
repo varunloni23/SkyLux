@@ -218,12 +218,12 @@
             <div>
                 <div class="detail-group">
                     <div class="detail-label">Passenger Name</div>
-                    <div class="detail-value">John Doe</div>
+                    <div class="detail-value">{{ user_name }}</div>
                 </div>
                 
                 <div class="detail-group">
                     <div class="detail-label">Email</div>
-                    <div class="detail-value">john.doe@example.com</div>
+                    <div class="detail-value">{{ user_email if user_email else "No email available" }}</div>
                 </div>
                 
                 <div class="detail-group">

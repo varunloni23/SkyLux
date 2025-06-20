@@ -56,6 +56,51 @@ body {
     color: #4299e1;
 }
 
+.nav-button {
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.nav-button.login {
+    background-color: #4299e1;
+    color: white !important;
+}
+
+.nav-button.login:hover {
+    background-color: #3182ce;
+    color: white !important;
+}
+
+.nav-button.register {
+    background-color: white;
+    color: #4299e1 !important;
+    border: 1px solid #4299e1;
+}
+
+.nav-button.register:hover {
+    background-color: #ebf8ff;
+}
+
+.nav-button.admin {
+    background-color: #805ad5;
+    color: white !important;
+}
+
+.nav-button.admin:hover {
+    background-color: #6b46c1;
+}
+
+.nav-button.logout {
+    background-color: #f56565;
+    color: white !important;
+}
+
+.nav-button.logout:hover {
+    background-color: #e53e3e;
+}
+
 /* Hero Section */
 .hero {
     height: 100vh;

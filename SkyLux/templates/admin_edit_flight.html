@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Flight - SkyLux Airlines</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            background: #1a365d;
+            color: white;
+            padding: 2rem 0;
+            position: fixed;
+            width: 250px;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        
+        .sidebar-header {
+            padding: 0 1.5rem 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 1.5rem;
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .sidebar-menu li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1.5rem;
+            color: #cbd5e0;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .sidebar-menu .icon {
+            margin-right: 0.8rem;
+            font-size: 1.2rem;
+        }
+        
+        .main-content {
+            padding: 2rem;
+            margin-left: 250px;
+        }
+        
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .dashboard-header h1 {
+            font-size: 1.8rem;
+            color: #1a365d;
+        }
+        
+        .user-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .user-actions .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #4299e1;
+            color: white;
+            border: none;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary:hover {
+            background: #3182ce;
+        }
+        
+        .btn-secondary {
+            background: #a0aec0;
+            color: white;
+            border: none;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-secondary:hover {
+            background: #718096;
+        }
+        
+        .form-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #4a5568;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .form-footer {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+        
+        .wide-group {
+            grid-column: span 2;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>✈️ SkyLux Admin</h2>
+            </div>
+            
+            <ul class="sidebar-menu">
+                <li><a href="{{ url_for('admin_dashboard') }}"><span class="icon">📊</span> Dashboard</a></li>
+                <li><a href="{{ url_for('admin_flights') }}" class="active"><span class="icon">✈️</span> Flights</a></li>
+                <li><a href="{{ url_for('admin_bookings') }}"><span class="icon">🧳</span> Bookings</a></li>
+                <li><a href="#"><span class="icon">👥</span> Users</a></li>
+                <li><a href="#"><span class="icon">🛫</span> Aircraft</a></li>
+                <li><a href="#"><span class="icon">🌍</span> Airports</a></li>
+                <li><a href="#"><span class="icon">⚙️</span> Settings</a></li>
+                <li><a href="{{ url_for('logout') }}"><span class="icon">🚪</span> Logout</a></li>
+            </ul>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="dashboard-header">
+                <h1>Edit Flight {{ flight.flight_number }}</h1>
+                
+                <div class="user-actions">
+                    <a href="{{ url_for('admin_flights') }}" class="btn btn-secondary">Back to Flights</a>
+                </div>
+            </div>
+            
+            <div class="form-container">
+                <form action="{{ url_for('edit_flight', flight_id=flight.id) }}" method="post">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="flight_number">Flight Number</label>
+                            <input type="text" id="flight_number" name="flight_number" class="form-control" value="{{ flight.flight_number }}" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="aircraft_id">Aircraft</label>
+                            <select id="aircraft_id" name="aircraft_id" class="form-control" required>
+                                <option value="">Select Aircraft</option>
+                                {% for ac in aircraft %}
+                                    <option value="{{ ac.id }}" {% if ac.id == flight.aircraft_id %}selected{% endif %}>{{ ac.model }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="origin_airport_id">Origin Airport</label>
+                            <select id="origin_airport_id" name="origin_airport_id" class="form-control" required>
+                                <option value="">Select Origin</option>
+                                {% for airport in airports %}
+                                    <option value="{{ airport.id }}" {% if airport.id == flight.origin_airport_id %}selected{% endif %}>{{ airport.city }} ({{ airport.code }}) - {{ airport.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="destination_airport_id">Destination Airport</label>
+                            <select id="destination_airport_id" name="destination_airport_id" class="form-control" required>
+                                <option value="">Select Destination</option>
+                                {% for airport in airports %}
+                                    <option value="{{ airport.id }}" {% if airport.id == flight.destination_airport_id %}selected{% endif %} {% if airport.id == flight.origin_airport_id %}disabled{% endif %}>{{ airport.city }} ({{ airport.code }}) - {{ airport.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="departure_date">Departure Date</label>
+                            <input type="date" id="departure_date" name="departure_date" class="form-control" value="{{ flight.departure_time.strftime('%Y-%m-%d') }}" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="departure_time">Departure Time</label>
+                            <input type="time" id="departure_time" name="departure_time" class="form-control" value="{{ flight.departure_time.strftime('%H:%M') }}" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="arrival_date">Arrival Date</label>
+                            <input type="date" id="arrival_date" name="arrival_date" class="form-control" value="{{ flight.arrival_time.strftime('%Y-%m-%d') }}" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="arrival_time">Arrival Time</label>
+                            <input type="time" id="arrival_time" name="arrival_time" class="form-control" value="{{ flight.arrival_time.strftime('%H:%M') }}" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="economy_price">Economy Price ($)</label>
+                            <input type="number" id="economy_price" name="economy_price" class="form-control" min="1" step="0.01" value="{{ flight.economy_price }}" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="business_price">Business Price ($)</label>
+                            <input type="number" id="business_price" name="business_price" class="form-control" min="1" step="0.01" value="{{ flight.business_price }}" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="first_class_price">First Class Price ($)</label>
+                            <input type="number" id="first_class_price" name="first_class_price" class="form-control" min="1" step="0.01" value="{{ flight.first_class_price }}" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="status">Status</label>
+                            <select id="status" name="status" class="form-control" required>
+                                <option value="Scheduled" {% if flight.status == 'Scheduled' %}selected{% endif %}>Scheduled</option>
+                                <option value="On Time" {% if flight.status == 'On Time' %}selected{% endif %}>On Time</option>
+                                <option value="Delayed" {% if flight.status == 'Delayed' %}selected{% endif %}>Delayed</option>
+                                <option value="Boarding" {% if flight.status == 'Boarding' %}selected{% endif %}>Boarding</option>
+                                <option value="Departed" {% if flight.status == 'Departed' %}selected{% endif %}>Departed</option>
+                                <option value="Arrived" {% if flight.status == 'Arrived' %}selected{% endif %}>Arrived</option>
+                                <option value="Cancelled" {% if flight.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="gate">Gate</label>
+                            <input type="text" id="gate" name="gate" class="form-control" value="{{ flight.gate }}">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="terminal">Terminal</label>
+                            <input type="text" id="terminal" name="terminal" class="form-control" value="{{ flight.terminal }}">
+                        </div>
+                    </div>
+                    
+                    <div class="form-footer">
+                        <a href="{{ url_for('admin_flights') }}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Prevent selecting the same airport for origin and destination
+        document.getElementById('origin_airport_id').addEventListener('change', function() {
+            var originId = this.value;
+            var destinationSelect = document.getElementById('destination_airport_id');
+            
+            for (var i = 0; i < destinationSelect.options.length; i++) {
+                destinationSelect.options[i].disabled = (destinationSelect.options[i].value === originId);
+            }
+            
+            if (destinationSelect.value === originId) {
+                destinationSelect.value = '';
+            }
+        });
+        
+        // Auto-calculate business and first class prices based on economy price
+        document.getElementById('economy_price').addEventListener('input', function() {
+            var economyPrice = parseFloat(this.value) || 0;
+            document.getElementById('business_price').value = (economyPrice * 2.5).toFixed(2);
+            document.getElementById('first_class_price').value = (economyPrice * 4).toFixed(2);
+        });
+    </script>
+</body>
+</html> 

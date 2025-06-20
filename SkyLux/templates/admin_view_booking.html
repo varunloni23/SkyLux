@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Details - SkyLux Airlines</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            background: #1a365d;
+            color: white;
+            padding: 2rem 0;
+            position: fixed;
+            width: 250px;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        
+        .sidebar-header {
+            padding: 0 1.5rem 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 1.5rem;
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .sidebar-menu li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1.5rem;
+            color: #cbd5e0;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .sidebar-menu .icon {
+            margin-right: 0.8rem;
+            font-size: 1.2rem;
+        }
+        
+        .main-content {
+            padding: 2rem;
+            margin-left: 250px;
+        }
+        
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .dashboard-header h1 {
+            font-size: 1.8rem;
+            color: #1a365d;
+        }
+        
+        .user-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background: #4299e1;
+            color: white;
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background: #3182ce;
+        }
+        
+        .btn-secondary {
+            background: #a0aec0;
+            color: white;
+            border: none;
+        }
+        
+        .btn-secondary:hover {
+            background: #718096;
+        }
+        
+        .btn-danger {
+            background: #e53e3e;
+            color: white;
+            border: none;
+        }
+        
+        .btn-danger:hover {
+            background: #c53030;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .card-title {
+            font-size: 1.25rem;
+            color: #1a365d;
+            font-weight: 600;
+        }
+        
+        .booking-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+        }
+        
+        .info-group {
+            margin-bottom: 1rem;
+        }
+        
+        .info-label {
+            color: #718096;
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .info-value {
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .status {
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        .status-confirmed {
+            background: #c6f6d5;
+            color: #2f855a;
+        }
+        
+        .status-pending {
+            background: #fefcbf;
+            color: #975a16;
+        }
+        
+        .status-cancelled {
+            background: #fed7d7;
+            color: #c53030;
+        }
+        
+        .status-ontime {
+            background: #c6f6d5;
+            color: #2f855a;
+        }
+        
+        .status-delayed {
+            background: #fefcbf;
+            color: #975a16;
+        }
+        
+        .status-boarding {
+            background: #bee3f8;
+            color: #2c5282;
+        }
+        
+        .status-departed {
+            background: #e9d8fd;
+            color: #553c9a;
+        }
+        
+        .status-arrived {
+            background: #c6f6d5;
+            color: #2f855a;
+        }
+        
+        .travel-class {
+            text-transform: capitalize;
+        }
+        
+        .cancellation-details {
+            background: #f7fafc;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: 1rem;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 500px;
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: black;
+        }
+        
+        .modal-footer {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>✈️ SkyLux Admin</h2>
+            </div>
+            
+            <ul class="sidebar-menu">
+                <li><a href="{{ url_for('admin_dashboard') }}"><span class="icon">📊</span> Dashboard</a></li>
+                <li><a href="{{ url_for('admin_flights') }}"><span class="icon">✈️</span> Flights</a></li>
+                <li><a href="{{ url_for('admin_bookings') }}" class="active"><span class="icon">🧳</span> Bookings</a></li>
+                <li><a href="#"><span class="icon">👥</span> Users</a></li>
+                <li><a href="#"><span class="icon">🛫</span> Aircraft</a></li>
+                <li><a href="#"><span class="icon">🌍</span> Airports</a></li>
+                <li><a href="#"><span class="icon">⚙️</span> Settings</a></li>
+                <li><a href="{{ url_for('logout') }}"><span class="icon">🚪</span> Logout</a></li>
+            </ul>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="dashboard-header">
+                <h1>Booking Details - {{ booking.booking_reference }}</h1>
+                
+                <div class="user-actions">
+                    <a href="{{ url_for('admin_bookings') }}" class="btn btn-secondary">Back to Bookings</a>
+                    <button class="btn btn-primary" onclick="printBooking()">Print Booking</button>
+                    {% if booking.booking_status != 'Cancelled' %}
+                        <button class="btn btn-danger" onclick="openCancelModal()">Cancel Booking</button>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="booking-grid">
+                <!-- Passenger Information -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Passenger Information</div>
+                        <span class="status status-{{ booking.booking_status.lower() }}">
+                            {{ booking.booking_status }}
+                        </span>
+                    </div>
+                    
+                    <div class="info-group">
+                        <div class="info-label">Name</div>
+                        <div class="info-value">{{ booking.passenger_name }}</div>
+                    </div>
+                    
+                    <div class="info-group">
+                        <div class="info-label">Email</div>
+                        <div class="info-value">{{ booking.passenger_email }}</div>
+                    </div>
+                    
+                    <div class="info-group">
+                        <div class="info-label">Travel Class</div>
+                        <div class="info-value travel-class">{{ booking.travel_class }}</div>
+                    </div>
+                    
+                    <div class="info-group">
+                        <div class="info-label">Seat Number</div>
+                        <div class="info-value">{{ booking.seat_number }}</div>
+                    </div>
+                    
+                    <div class="info-group">
+                        <div class="info-label">Booking Date</div>
+                        <div class="info-value">{{ booking.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                    </div>
+                    
+                    <div class="info-group">
+                        <div class="info-label">Total Amount</div>
+                        <div class="info-value">${{ booking.total_amount }}</div>
+                    </div>
+                    
+                    {% if booking.booking_status == 'Cancelled' and cancellation %}
+                        <div class="cancellation-details">
+                            <div class="info-group">
+                                <div class="info-label">Cancellation ID</div>
+                                <div class="info-value">{{ cancellation.cancellation_id }}</div>
+                            </div>
+                            
+                            <div class="info-group">
+                                <div class="info-label">Refund Amount</div>
+                                <div class="info-value">${{ cancellation.refund_amount }}</div>
+                            </div>
+                            
+                            <div class="info-group">
+                                <div class="info-label">Reason</div>
+                                <div class="info-value">{{ cancellation.reason }}</div>
+                            </div>
+                            
+                            <div class="info-group">
+                                <div class="info-label">Cancellation Date</div>
+                                <div class="info-value">{{ cancellation.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Flight Information -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Flight Information</div>
+                        <span class="status status-{{ booking.flight_status.lower().replace(' ', '') }}">
+                            {{ booking.flight_status }}
+                        </span>
+                    </div>
+                    
+                    <div class="info-group">
+                        <div class="info-label">Flight Number</div>
+                        <div class="info-value">{{ booking.flight_number }}</div>
+                    </div>
+                    
+                    <div class="info-group">
+                        <div class="info-label">Route</div>
+                        <div class="info-value">{{ booking.departure_city }} → {{ booking.arrival_city }}</div>
+                    </div>
+                    
+                    <div class="info-group">
+                        <div class="info-label">Departure Time</div>
+                        <div class="info-value">{{ booking.departure_time.strftime('%Y-%m-%d %H:%M') }}</div>
+                    </div>
+                    
+                    <div class="info-group">
+                        <div class="info-label">Arrival Time</div>
+                        <div class="info-value">{{ booking.arrival_time.strftime('%Y-%m-%d %H:%M') }}</div>
+                    </div>
+                    
+                    <div class="info-group">
+                        <div class="info-label">Aircraft</div>
+                        <div class="info-value">{{ booking.aircraft }}</div>
+                    </div>
+                    
+                    <div class="info-group">
+                        <div class="info-label">Gate</div>
+                        <div class="info-value">{{ booking.gate }}</div>
+                    </div>
+                    
+                    <div class="info-group">
+                        <div class="info-label">Terminal</div>
+                        <div class="info-value">{{ booking.terminal }}</div>
+                    </div>
+                    
+                    <div class="info-group">
+                        <div class="info-label">Duration</div>
+                        <div class="info-value">
+                            {% set duration = (booking.arrival_time - booking.departure_time).total_seconds() / 3600 %}
+                            {% set hours = duration|int %}
+                            {% set minutes = ((duration - hours) * 60)|int %}
+                            {{ hours }}h {{ minutes }}m
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Update Status Form -->
+            {% if booking.booking_status != 'Cancelled' %}
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Update Booking Status</div>
+                    </div>
+                    
+                    <form action="{{ url_for('update_booking_status', booking_id=booking.id) }}" method="post">
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            <select name="status" style="padding: 0.5rem; border-radius: 5px; border: 1px solid #e2e8f0;">
+                                <option value="Pending" {% if booking.booking_status == 'Pending' %}selected{% endif %}>Pending</option>
+                                <option value="Confirmed" {% if booking.booking_status == 'Confirmed' %}selected{% endif %}>Confirmed</option>
+                                <option value="Cancelled">Cancelled</option>
+                            </select>
+                            
+                            <button type="submit" class="btn btn-primary">Update Status</button>
+                        </div>
+                    </form>
+                </div>
+            {% endif %}
+        </main>
+    </div>
+    
+    <!-- Cancel Booking Modal -->
+    <div id="cancelModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeCancelModal()">&times;</span>
+            <h2>Cancel Booking</h2>
+            <p>Are you sure you want to cancel this booking? This action cannot be undone.</p>
+            <p>A refund of approximately 75% of the booking amount will be processed automatically.</p>
+            
+            <form action="{{ url_for('update_booking_status', booking_id=booking.id) }}" method="post">
+                <input type="hidden" name="status" value="Cancelled">
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeCancelModal()">Close</button>
+                    <button type="submit" class="btn btn-danger">Cancel Booking</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // Print Booking
+        function printBooking() {
+            window.print();
+        }
+        
+        // Cancel Modal
+        var cancelModal = document.getElementById('cancelModal');
+        
+        function openCancelModal() {
+            cancelModal.style.display = 'block';
+        }
+        
+        function closeCancelModal() {
+            cancelModal.style.display = 'none';
+        }
+        
+        // Close the modal when clicking outside of it
+        window.onclick = function(event) {
+            if (event.target == cancelModal) {
+                closeCancelModal();
+            }
+        }
+    </script>
+</body>
+</html> 

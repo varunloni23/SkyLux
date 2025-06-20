@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - SkyLux Airlines</title>
+    <title>Booking Management - SkyLux Airlines</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <style>
         .dashboard-container {
@@ -75,54 +75,17 @@
             color: #1a365d;
         }
         
-        .user-actions {
+        .filters {
             display: flex;
-            align-items: center;
             gap: 1rem;
+            margin-bottom: 1.5rem;
         }
         
-        .user-actions .btn {
-            padding: 0.5rem 1rem;
+        .filter-select {
+            padding: 0.5rem;
+            border: 1px solid #e2e8f0;
             border-radius: 5px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-primary {
-            background: #4299e1;
-            color: white;
-            border: none;
-        }
-        
-        .btn-primary:hover {
-            background: #3182ce;
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        .stat-card {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 1.5rem;
-        }
-        
-        .stat-title {
-            color: #718096;
             font-size: 0.875rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #1a365d;
         }
         
         .data-table {
@@ -188,47 +151,47 @@
             cursor: pointer;
             font-weight: 600;
             transition: color 0.3s ease;
+            text-decoration: none;
+            margin-right: 0.5rem;
         }
         
         .action-btn:hover {
             color: #3182ce;
         }
         
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
+        .travel-class {
+            text-transform: capitalize;
         }
         
-        .section-title {
-            font-size: 1.2rem;
-            color: #1a365d;
-            font-weight: 600;
-        }
-        
-        .tab-container {
-            margin-bottom: 2rem;
-        }
-        
-        .tabs {
-            display: flex;
-            border-bottom: 1px solid #e2e8f0;
-            margin-bottom: 1.5rem;
-        }
-        
-        .tab {
-            padding: 0.75rem 1.5rem;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
+        .no-data {
+            text-align: center;
+            padding: 2rem;
             color: #718096;
-            font-weight: 600;
-            transition: all 0.3s ease;
         }
         
-        .tab.active {
-            border-color: #4299e1;
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+        
+        .pagination a, .pagination span {
+            padding: 0.5rem 0.75rem;
+            margin: 0 0.25rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+            text-decoration: none;
             color: #4299e1;
+        }
+        
+        .pagination a:hover {
+            background: #f7fafc;
+        }
+        
+        .pagination .active {
+            background: #4299e1;
+            color: white;
+            border-color: #4299e1;
         }
     </style>
 </head>
@@ -241,9 +204,9 @@
             </div>
             
             <ul class="sidebar-menu">
-                <li><a href="#" class="active"><span class="icon">📊</span> Dashboard</a></li>
+                <li><a href="{{ url_for('admin_dashboard') }}"><span class="icon">📊</span> Dashboard</a></li>
                 <li><a href="{{ url_for('admin_flights') }}"><span class="icon">✈️</span> Flights</a></li>
-                <li><a href="{{ url_for('admin_bookings') }}"><span class="icon">🧳</span> Bookings</a></li>
+                <li><a href="{{ url_for('admin_bookings') }}" class="active"><span class="icon">🧳</span> Bookings</a></li>
                 <li><a href="javascript:void(0);" onclick="alert('This feature is coming soon')"><span class="icon">👥</span> Users</a></li>
                 <li><a href="javascript:void(0);" onclick="alert('This feature is coming soon')"><span class="icon">🛫</span> Aircraft</a></li>
                 <li><a href="javascript:void(0);" onclick="alert('This feature is coming soon')"><span class="icon">🌍</span> Airports</a></li>
@@ -255,66 +218,61 @@
         <!-- Main Content -->
         <main class="main-content">
             <div class="dashboard-header">
-                <h1>Dashboard</h1>
-                
-                <div class="user-actions">
-                    <span>Welcome, Admin</span>
-                    <a href="{{ url_for('admin_flights') }}" class="btn btn-primary">+ Add New Flight</a>
-                </div>
+                <h1>Booking Management</h1>
             </div>
             
-            <!-- Stats Grid -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-title">Total Bookings</div>
-                    <div class="stat-value">{{ total_bookings }}</div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-title">Active Flights</div>
-                    <div class="stat-value">{{ active_flights }}</div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-title">Revenue</div>
-                    <div class="stat-value">${{ total_revenue }}</div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-title">Registered Users</div>
-                    <div class="stat-value">{{ total_users }}</div>
-                </div>
+            <!-- Filters -->
+            <div class="filters">
+                <form action="{{ url_for('admin_bookings') }}" method="get">
+                    <select name="status" class="filter-select" onchange="this.form.submit()">
+                        <option value="all" {% if selected_status == 'all' %}selected{% endif %}>All Statuses</option>
+                        <option value="Pending" {% if selected_status == 'Pending' %}selected{% endif %}>Pending</option>
+                        <option value="Confirmed" {% if selected_status == 'Confirmed' %}selected{% endif %}>Confirmed</option>
+                        <option value="Cancelled" {% if selected_status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                    </select>
+                </form>
             </div>
             
-            <!-- Recent Bookings -->
-            <div class="section-header">
-                <h2 class="section-title">Recent Bookings</h2>
-                <a href="{{ url_for('admin_bookings') }}" class="action-btn">View All</a>
-            </div>
-            
+            <!-- Bookings Table -->
             <div class="data-table">
                 <table>
                     <thead>
                         <tr>
-                            <th>Booking ID</th>
+                            <th>Booking Ref</th>
                             <th>Passenger</th>
                             <th>Flight</th>
                             <th>Date</th>
+                            <th>Class</th>
                             <th>Amount</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% if recent_bookings %}
-                            {% for booking in recent_bookings %}
+                        {% if bookings %}
+                            {% for booking in bookings %}
                                 <tr>
                                     <td>{{ booking.booking_reference }}</td>
                                     <td>{{ booking.passenger_name }}</td>
                                     <td>{{ booking.flight_number }} ({{ booking.departure_city }} → {{ booking.arrival_city }})</td>
-                                    <td>{{ booking.departure_time.strftime('%Y-%m-%d') }}</td>
+                                    <td>
+                                        {% if booking.departure_time %}
+                                            {% if booking.departure_time is string %}
+                                                {{ booking.departure_time }}
+                                            {% else %}
+                                                {{ booking.departure_time.strftime('%Y-%m-%d %H:%M') }}
+                                            {% endif %}
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </td>
+                                    <td class="travel-class">{{ booking.travel_class }}</td>
                                     <td>${{ booking.total_amount }}</td>
-                                    <td><span class="status status-{{ booking.booking_status.lower() }}">{{ booking.booking_status }}</span></td>
+                                    <td>
+                                        <span class="status status-{{ booking.booking_status.lower() }}">
+                                            {{ booking.booking_status }}
+                                        </span>
+                                    </td>
                                     <td>
                                         <a href="{{ url_for('view_booking', booking_id=booking.id) }}" class="action-btn">View</a>
                                     </td>
@@ -322,66 +280,42 @@
                             {% endfor %}
                         {% else %}
                             <tr>
-                                <td colspan="7" class="no-data">No bookings found</td>
+                                <td colspan="8" class="no-data">No bookings found</td>
                             </tr>
                         {% endif %}
                     </tbody>
                 </table>
             </div>
             
-            <!-- Flight Management -->
-            <div class="section-header" style="margin-top: 2rem;">
-                <h2 class="section-title">Today's Flights</h2>
-                <a href="{{ url_for('admin_flights') }}" class="action-btn">View All</a>
-            </div>
-            
-            <div class="data-table">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Flight No.</th>
-                            <th>Route</th>
-                            <th>Departure</th>
-                            <th>Arrival</th>
-                            <th>Aircraft</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% if todays_flights %}
-                            {% for flight in todays_flights %}
-                                <tr>
-                                    <td>{{ flight.flight_number }}</td>
-                                    <td>{{ flight.departure_city }} → {{ flight.arrival_city }}</td>
-                                    <td>{{ flight.departure_time.strftime('%H:%M') }}</td>
-                                    <td>{{ flight.arrival_time.strftime('%H:%M') }}</td>
-                                    <td>{{ flight.aircraft }}</td>
-                                    <td><span class="status status-{{ flight.status.lower().replace(' ', '') }}">{{ flight.status }}</span></td>
-                                    <td>
-                                        <a href="{{ url_for('edit_flight', flight_id=flight.id) }}" class="action-btn">Edit</a>
-                                    </td>
-                                </tr>
+            <!-- Debug Information -->
+            <div style="margin-top: 2rem; padding: 1rem; background: #f8f9fa; border-radius: 10px;">
+                <h3>Debug Information</h3>
+                <p>Number of bookings: {{ bookings|length }}</p>
+                {% if bookings %}
+                    <details>
+                        <summary>Raw Booking Data</summary>
+                        <pre>
+                        {% for booking in bookings %}
+                            Booking {{ loop.index }}:
+                            {% for key, value in booking.items() %}
+                                {{ key }}: {{ value }}
                             {% endfor %}
-                        {% else %}
-                            <tr>
-                                <td colspan="7" class="no-data">No flights scheduled for today</td>
-                            </tr>
-                        {% endif %}
-                    </tbody>
-                </table>
+                            ---
+                        {% endfor %}
+                        </pre>
+                    </details>
+                {% endif %}
             </div>
+            
+            <!-- Pagination (for future implementation) -->
+            <!-- <div class="pagination">
+                <a href="#">&laquo;</a>
+                <a href="#" class="active">1</a>
+                <a href="#">2</a>
+                <a href="#">3</a>
+                <a href="#">&raquo;</a>
+            </div> -->
         </main>
     </div>
-
-    <script>
-        // Tab switching functionality (for future use)
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-            });
-        });
-    </script>
 </body>
 </html> 

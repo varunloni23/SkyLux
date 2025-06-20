@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Management - SkyLux Airlines</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            background: #1a365d;
+            color: white;
+            padding: 2rem 0;
+            position: fixed;
+            width: 250px;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        
+        .sidebar-header {
+            padding: 0 1.5rem 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 1.5rem;
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .sidebar-menu li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1.5rem;
+            color: #cbd5e0;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .sidebar-menu .icon {
+            margin-right: 0.8rem;
+            font-size: 1.2rem;
+        }
+        
+        .main-content {
+            padding: 2rem;
+            margin-left: 250px;
+        }
+        
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .dashboard-header h1 {
+            font-size: 1.8rem;
+            color: #1a365d;
+        }
+        
+        .user-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .user-actions .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #4299e1;
+            color: white;
+            border: none;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary:hover {
+            background: #3182ce;
+        }
+        
+        .btn-danger {
+            background: #e53e3e;
+            color: white;
+            border: none;
+        }
+        
+        .btn-danger:hover {
+            background: #c53030;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .filter-select {
+            padding: 0.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+            font-size: 0.875rem;
+        }
+        
+        .data-table {
+            width: 100%;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .data-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .data-table th, .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .data-table th {
+            background: #f7fafc;
+            color: #4a5568;
+            font-weight: 600;
+        }
+        
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .data-table tr:hover {
+            background: #f7fafc;
+        }
+        
+        .status {
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        .status-scheduled {
+            background: #c6f6d5;
+            color: #2f855a;
+        }
+        
+        .status-ontime {
+            background: #c6f6d5;
+            color: #2f855a;
+        }
+        
+        .status-delayed {
+            background: #fefcbf;
+            color: #975a16;
+        }
+        
+        .status-boarding {
+            background: #bee3f8;
+            color: #2c5282;
+        }
+        
+        .status-departed {
+            background: #e9d8fd;
+            color: #553c9a;
+        }
+        
+        .status-arrived {
+            background: #c6f6d5;
+            color: #2f855a;
+        }
+        
+        .status-cancelled {
+            background: #fed7d7;
+            color: #c53030;
+        }
+        
+        .action-btn {
+            background: none;
+            border: none;
+            color: #4299e1;
+            cursor: pointer;
+            font-weight: 600;
+            transition: color 0.3s ease;
+            text-decoration: none;
+            margin-right: 0.5rem;
+        }
+        
+        .action-btn:hover {
+            color: #3182ce;
+        }
+        
+        .delete-btn {
+            color: #e53e3e;
+        }
+        
+        .delete-btn:hover {
+            color: #c53030;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: black;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #4a5568;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .modal-footer {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+        
+        .wide-group {
+            grid-column: span 2;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 2rem;
+            color: #718096;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>✈️ SkyLux Admin</h2>
+            </div>
+            
+            <ul class="sidebar-menu">
+                <li><a href="{{ url_for('admin_dashboard') }}"><span class="icon">📊</span> Dashboard</a></li>
+                <li><a href="{{ url_for('admin_flights') }}" class="active"><span class="icon">✈️</span> Flights</a></li>
+                <li><a href="{{ url_for('admin_bookings') }}"><span class="icon">🧳</span> Bookings</a></li>
+                <li><a href="#"><span class="icon">👥</span> Users</a></li>
+                <li><a href="#"><span class="icon">🛫</span> Aircraft</a></li>
+                <li><a href="#"><span class="icon">🌍</span> Airports</a></li>
+                <li><a href="#"><span class="icon">⚙️</span> Settings</a></li>
+                <li><a href="{{ url_for('logout') }}"><span class="icon">🚪</span> Logout</a></li>
+            </ul>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="dashboard-header">
+                <h1>Flight Management</h1>
+                
+                <div class="user-actions">
+                    <button class="btn btn-primary" onclick="openAddModal()">+ Add New Flight</button>
+                </div>
+            </div>
+            
+            <!-- Filters -->
+            <div class="filters">
+                <form action="{{ url_for('admin_flights') }}" method="get">
+                    <select name="status" class="filter-select" onchange="this.form.submit()">
+                        <option value="all" {% if selected_status == 'all' %}selected{% endif %}>All Statuses</option>
+                        <option value="Scheduled" {% if selected_status == 'Scheduled' %}selected{% endif %}>Scheduled</option>
+                        <option value="On Time" {% if selected_status == 'On Time' %}selected{% endif %}>On Time</option>
+                        <option value="Delayed" {% if selected_status == 'Delayed' %}selected{% endif %}>Delayed</option>
+                        <option value="Boarding" {% if selected_status == 'Boarding' %}selected{% endif %}>Boarding</option>
+                        <option value="Departed" {% if selected_status == 'Departed' %}selected{% endif %}>Departed</option>
+                        <option value="Arrived" {% if selected_status == 'Arrived' %}selected{% endif %}>Arrived</option>
+                        <option value="Cancelled" {% if selected_status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                    </select>
+                </form>
+            </div>
+            
+            <!-- Flights Table -->
+            <div class="data-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Flight #</th>
+                            <th>Route</th>
+                            <th>Departure</th>
+                            <th>Arrival</th>
+                            <th>Aircraft</th>
+                            <th>Economy</th>
+                            <th>Business</th>
+                            <th>First</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if flights %}
+                            {% for flight in flights %}
+                                <tr>
+                                    <td>{{ flight.flight_number }}</td>
+                                    <td>{{ flight.departure_city }} → {{ flight.arrival_city }}</td>
+                                    <td>{{ flight.departure_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td>{{ flight.arrival_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td>{{ flight.aircraft }}</td>
+                                    <td>${{ flight.economy_price }}</td>
+                                    <td>${{ flight.business_price }}</td>
+                                    <td>${{ flight.first_class_price }}</td>
+                                    <td>
+                                        <span class="status status-{{ flight.status.lower().replace(' ', '') }}">
+                                            {{ flight.status }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('edit_flight', flight_id=flight.id) }}" class="action-btn">Edit</a>
+                                        <button class="action-btn delete-btn" onclick="confirmDelete({{ flight.id }})">Delete</button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="10" class="no-data">No flights found</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Add Flight Modal -->
+            <div id="addFlightModal" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="closeAddModal()">&times;</span>
+                    <h2>Add New Flight</h2>
+                    
+                    <form action="{{ url_for('add_flight') }}" method="post">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="flight_number">Flight Number</label>
+                                <input type="text" id="flight_number" name="flight_number" class="form-control" placeholder="Leave empty for auto-generation">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="aircraft_id">Aircraft</label>
+                                <select id="aircraft_id" name="aircraft_id" class="form-control" required>
+                                    <option value="">Select Aircraft</option>
+                                    {% for ac in aircraft %}
+                                        <option value="{{ ac.id }}">{{ ac.model }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="origin_airport_id">Origin Airport</label>
+                                <select id="origin_airport_id" name="origin_airport_id" class="form-control" required>
+                                    <option value="">Select Origin</option>
+                                    {% for airport in airports %}
+                                        <option value="{{ airport.id }}">{{ airport.city }} ({{ airport.code }}) - {{ airport.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="destination_airport_id">Destination Airport</label>
+                                <select id="destination_airport_id" name="destination_airport_id" class="form-control" required>
+                                    <option value="">Select Destination</option>
+                                    {% for airport in airports %}
+                                        <option value="{{ airport.id }}">{{ airport.city }} ({{ airport.code }}) - {{ airport.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="departure_date">Departure Date</label>
+                                <input type="date" id="departure_date" name="departure_date" class="form-control" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="departure_time">Departure Time</label>
+                                <input type="time" id="departure_time" name="departure_time" class="form-control" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="arrival_date">Arrival Date</label>
+                                <input type="date" id="arrival_date" name="arrival_date" class="form-control" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="arrival_time">Arrival Time</label>
+                                <input type="time" id="arrival_time" name="arrival_time" class="form-control" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="economy_price">Economy Price ($)</label>
+                                <input type="number" id="economy_price" name="economy_price" class="form-control" min="1" step="0.01" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="business_price">Business Price ($)</label>
+                                <input type="number" id="business_price" name="business_price" class="form-control" min="1" step="0.01" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="first_class_price">First Class Price ($)</label>
+                                <input type="number" id="first_class_price" name="first_class_price" class="form-control" min="1" step="0.01" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="status">Status</label>
+                                <select id="status" name="status" class="form-control" required>
+                                    <option value="Scheduled">Scheduled</option>
+                                    <option value="On Time">On Time</option>
+                                    <option value="Delayed">Delayed</option>
+                                    <option value="Boarding">Boarding</option>
+                                    <option value="Departed">Departed</option>
+                                    <option value="Arrived">Arrived</option>
+                                    <option value="Cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="gate">Gate</label>
+                                <input type="text" id="gate" name="gate" class="form-control">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="terminal">Terminal</label>
+                                <input type="text" id="terminal" name="terminal" class="form-control">
+                            </div>
+                        </div>
+                        
+                        <div class="modal-footer">
+                            <button type="button" class="btn" onclick="closeAddModal()">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Add Flight</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Delete Confirmation Modal (hidden by default) -->
+            <div id="deleteModal" class="modal">
+                <div class="modal-content" style="max-width: 500px;">
+                    <h2>Confirm Deletion</h2>
+                    <p>Are you sure you want to delete this flight? This action cannot be undone.</p>
+                    <p>If the flight has any bookings, it will be marked as cancelled instead of being deleted.</p>
+                    
+                    <form id="deleteForm" action="" method="post">
+                        <div class="modal-footer">
+                            <button type="button" class="btn" onclick="closeDeleteModal()">Cancel</button>
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Add Flight Modal
+        var addModal = document.getElementById('addFlightModal');
+        
+        function openAddModal() {
+            addModal.style.display = 'block';
+            
+            // Set default values
+            document.getElementById('departure_date').valueAsDate = new Date();
+            document.getElementById('arrival_date').valueAsDate = new Date();
+            
+            // Calculate default prices
+            document.getElementById('economy_price').value = '200';
+            document.getElementById('business_price').value = '500';
+            document.getElementById('first_class_price').value = '800';
+        }
+        
+        function closeAddModal() {
+            addModal.style.display = 'none';
+        }
+        
+        // Delete Flight Modal
+        var deleteModal = document.getElementById('deleteModal');
+        
+        function confirmDelete(flightId) {
+            deleteModal.style.display = 'block';
+            document.getElementById('deleteForm').action = '/admin/flights/delete/' + flightId;
+        }
+        
+        function closeDeleteModal() {
+            deleteModal.style.display = 'none';
+        }
+        
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            if (event.target == addModal) {
+                closeAddModal();
+            }
+            if (event.target == deleteModal) {
+                closeDeleteModal();
+            }
+        }
+        
+        // Prevent selecting the same airport for origin and destination
+        document.getElementById('origin_airport_id').addEventListener('change', function() {
+            var originId = this.value;
+            var destinationSelect = document.getElementById('destination_airport_id');
+            
+            for (var i = 0; i < destinationSelect.options.length; i++) {
+                destinationSelect.options[i].disabled = (destinationSelect.options[i].value === originId);
+            }
+            
+            if (destinationSelect.value === originId) {
+                destinationSelect.value = '';
+            }
+        });
+        
+        // Auto-calculate business and first class prices based on economy price
+        document.getElementById('economy_price').addEventListener('input', function() {
+            var economyPrice = parseFloat(this.value) || 0;
+            document.getElementById('business_price').value = (economyPrice * 2.5).toFixed(2);
+            document.getElementById('first_class_price').value = (economyPrice * 4).toFixed(2);
+        });
+    </script>
+</body>
+</html> 
